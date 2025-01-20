@@ -3,7 +3,7 @@ from typing import Optional, List
 from phi.assistant import Assistant 
 from phi.storage.assistant.postgres import PgAssistantStorage
 from phi.knowledge.pdf import PDFUrlKnowledgeBase
-from phi.vectordb.pgvector import pgvector2
+from phi.vectordb.pgvector import PgVector, SearchType
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -14,7 +14,7 @@ db_url = "postgresql+psycopg://ai:ai@localhost:5532/ai"
 
 knowledge_base = PDFUrlKnowledgeBase(
     urls = ["https://phi-public.s3.amazonaws.com/recipes/ThaiRecipes.pdf"],
-    vector_db = pgvector2(collection = "recipes", db_url = db_url, )
+    vector_db = PgVector(table_name = "recipes", db_url = db_url, search_type=SearchType.hybrid)
 )
 
 knowledge_base.load()
@@ -22,7 +22,7 @@ knowledge_base.load()
 storage = PgAssistantStorage(table_name = "pdf_assistant", db_url = db_url)
 
 def pdf_assistant(new: bool = False, user: str = "user"):
-    run_id = Optional[str] = None
+    run_id : Optional[str] = None
 
     if not new:
         existing_run_ids: List[str] = storage.get_all_run_ids(user)
